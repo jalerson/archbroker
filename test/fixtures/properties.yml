@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  plan_cost: 
+  dimensions: MyString
+  decor_limit: 
+  security_deposit: 
+  taxes: 
+  type_id: 
+
+two:
+  name: MyString
+  plan_cost: 
+  dimensions: MyString
+  decor_limit: 
+  security_deposit: 
+  taxes: 
+  type_id: 

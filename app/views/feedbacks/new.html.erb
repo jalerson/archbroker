@@ -1,0 +1,70 @@
+<%= content_for :head do %>
+  <script type="text/javascript">
+    $(function() {
+      $(".error").hide();
+    });
+
+    function validates() {
+      var validation = true;
+      $(".has-error").removeClass("has-error");
+      $(".error").hide();
+
+      if($("#name").val() == "") {
+        validation = false;
+        $("#name").parent().addClass("has-error");
+        $("#name_required").show();
+      }
+
+      if($("#email").val() == "") {
+        validation = false;
+        $("#email").parent().addClass("has-error");
+        $("#email_required").show();
+      } else {
+        if(!validates_email($("#email").val())) {
+          validation = false;
+          $("#email").parent().addClass("has-error");
+          $("#email_invalid").show();
+        }
+      }
+
+      if($("#message").val() == "") {
+        validation = false;
+        $("#message").parent().addClass("has-error");
+        $("#message_required").show();
+      }
+
+      return validation;
+
+    }
+  </script>
+<% end %>
+
+<h2>Feedback</h2>
+
+<%= form_tag({controller: "feedbacks", action: "create"}, method: "post", role: "form", onsubmit: 'return validates()') do %>
+  <div class="row-fluid">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="form-group">
+            <label for="name">Your name</label>
+            <%= text_field_tag(:name, nil, class: 'form-control') %>
+            <span id="name_required" class="error">Can't be blank!</span>
+          </div>
+          <div class="form-group">
+            <label for="email">E-mail address</label>
+            <%= email_field_tag(:email, nil, class: 'form-control') %>
+            <span id="email_required" class="error">Can't be blank!</span>
+            <span id="email_invalid" class="error">Invalid e-mail address!</span>
+          </div>
+          <div class="form-group">
+            <label for="message">Message</label>
+            <%= text_area_tag(:message, nil, class: 'form-control') %>
+            <span id="message_required" class="error">Can't be blank!</span>
+          </div>
+          <button type="submit" class="btn btn-success">Send!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

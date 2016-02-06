@@ -1,0 +1,309 @@
+<% content_for(:head) do %>
+  <%= javascript_include_tag 'jquery-ui' %>
+  <%= javascript_include_tag 'jquery.fs.zoetrope.min' %>
+  <%= javascript_include_tag 'toe.min' %>
+  <%= javascript_include_tag 'jquery.mousewheel.min' %>
+  <%= javascript_include_tag 'imgViewer.min' %>
+  <%= javascript_include_tag 'imgNotes' %>
+  <%= stylesheet_link_tag 'marker' %>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $(".error").hide();
+      $("#location_img").imgNotes({ canEdit: false });
+      $("#location_img").imgNotes("import", [{ x: "<%= @sale.x %>", y: "<%= @sale.y %>" }]);
+
+      $("#location_img").imgNotes("option", "onShow", function() {
+      });
+    });
+
+    function validates() {
+      var validation = true;
+      $(".has-error").removeClass("has-error");
+      $(".error").hide();
+
+      if (!$("input[name='rating[rating]']:checked").val()) {
+        validation = false;
+        $("#rating").parent().addClass("has-error");
+        $("#rating_required").show();
+      }
+
+      if($("#rating_reason").val() == "") {
+        validation = false;
+        $("#reason").parent().addClass("has-error");
+        $("#reason_required").show();
+      }
+
+      return validation;
+    }
+
+    function mouse_over() {
+      $("#sold").html('Mark as unsold!');
+      $("#sold").removeClass('btn-success');
+      $("#sold").addClass('btn-default');
+    }
+
+    function mouse_out() {
+      $("#sold").html("<span class='glyphicon glyphicon-ok'></span> Sold!");
+      $("#sold").removeClass('btn-default');
+      $("#sold").addClass('btn-success');
+    }
+
+    function sold(id) {
+      if(confirm('Are you sure that you want to mark this property as sold?')) {
+        location.href = '/sales/' + id + '/sold';
+      }
+    }
+
+    function unsold(id) {
+      if(confirm('Are you sure that you want to mark this property as unsold?')) {
+        location.href = '/sales/' + id + '/unsold';
+      }
+    }
+
+    function report_as_sold(id) {
+      if(confirm('Are you sure this property was already sold?')) {
+        location.href = '/sales/' + id + '/report_sold';
+      }
+    }
+
+    function report_breaking_rules(id) {
+      location.href = '/sales/' + id + '/report_breaking_rules';
+    }
+
+  </script>
+<% end %>
+
+<h2>
+  <%= @sale.title %>
+  <% if @sale.sold? %>
+    <span class="label label-success">Sold!</span>
+  <% end %>
+</h2>
+
+<div class="col-md-12">
+  <div class="well">
+    <div class="btn-group">
+      <% if current_user.present? and @sale.enable_sold_report?(current_user) %>
+        <% if current_user.already_reported_sale_as_sold?(@sale) %>
+          <a class="btn btn-info disabled" href="#"> <span class="glyphicon glyphicon-exclamation-sign"></span> Reported as sold</a>
+        <% else %>
+          <a class="btn btn-info" href="#" onclick="report_as_sold(<%= @sale.id %>)"><span class="glyphicon glyphicon-exclamation-sign"></span> Report as sold!</a>
+        <% end %>
+      <% end %>
+      <% if current_user.present? and current_user.id == @sale.user.id %>
+        <a href="<%= edit_sale_path %>" class="btn btn-primary"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+        <% if @sale.sold? %>
+          <a href="#" id="sold" class="btn btn-success" onmouseover="mouse_over()" onmouseout="mouse_out()" onclick="unsold(<%= @sale.id %>)"><span class="glyphicon glyphicon-ok"></span> Sold!</a>
+        <% else %>
+          <a href="#" id="sold" class="btn btn-default" onclick="sold(<%= @sale.id %>)"><span class="glyphicon glyphicon glyphicon-usd"></span> Mark as sold!</a>
+        <% end %>
+      <% end %>
+      <% unless current_user.present? and @sale.user.id == current_user.id %>
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#breaking_rules_div"><span class="glyphicon glyphicon-exclamation-sign"></span> Report breaking rules!</button>
+      <% end %>
+      <% if current_user.present? and @sale.user.id != current_user.id and !@sale.user.already_rated_by(current_user) %>
+        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#rating_div"><span class="glyphicon glyphicon-comment"></span> Rate this vendor!</button>
+      <% end %>
+      <% unless current_user.present? %>
+        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#login_required_div"><span class="glyphicon glyphicon-comment"></span> Rate this vendor!</button>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="row-fluid">
+  <div class="col-md-4">
+    <div class="panel panel-success">
+      <div class="panel-heading">
+        <h3 class="panel-title">Seller reputation</h3>
+      </div>
+      <div class="panel-body">
+        <ul class="list-group">
+          <li class="list-group-item"><strong>Username:</strong> <%= @sale.user.username %></li>
+          <li class="list-group-item">
+            <a href="#positive_ratings_div" class="btn btn-primary"><span class="glyphicon glyphicon-thumbs-up"></span> <span class="badge"><%= @positive_ratings.count %></span></a> 
+            <a href="#negative_ratings_div" class="btn btn-danger"><span class="glyphicon glyphicon-thumbs-down"></span> <span class="badge"><%= @negative_ratings.count %></span></a>
+          </li>
+          <li class="list-group-item">Selling properties <span class="badge"><%= @sale.user.sales_by_status(Status.selling).count %></span></li>
+          <li class="list-group-item">Sold properties <span class="badge"><%= @sale.user.sales_by_status(Status.sold).count %></span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="panel panel-success">
+      <div class="panel-heading">
+        <h3 class="panel-title">Property and sale informations</h3>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <label for="price">Price</label><br><%= @sale.price %> golds
+        </div>
+        <div class="form-group">
+          <label for="created_at">Registered since</label><br><%= @sale.created_at.strftime("%B %d, %Y") %>
+        </div>
+        <div class="form-group">
+          <label for="contact_ingame">Contact ingame</label><br><%= @sale.contact_ingame %>
+        </div>
+        <div class="form-group">
+          <label for="property">Property</label><br><%= @sale.property.name %>
+        </div>
+        <div class="form-group">
+          <label for="server">Server</label><br><%= @sale.server.name %>
+        </div>
+        <div class="form-group">
+          <label for="location">Location (Continent)</label><br><%= @sale.region.name %> (<%= @sale.region.continent.name %>)
+        </div>
+        <div class="form-group">
+          <label for="appraisal">Sale through appraisal certificate?</label><br>
+          <%= @sale.appraisal? %>
+        </div>
+        <div class="form-group">
+          <label for="items">Decorative items</label><br>
+          <% if @sale.items.empty? %>
+            Doesn't have.
+          <% else %>
+            <%= @sale.items %>
+          <% end %>
+        </div>
+        <div class="form-group">
+          <label for="items">Seller observations</label><br>
+          <% if @sale.obs.empty? %>
+            None.
+          <% else %>
+            <%= @sale.obs %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-8">
+    <div class="panel panel-success">
+      <div class="panel-heading">
+        <h3 class="panel-title">Property location</h3>
+      </div>
+      <div class="panel-body">
+        <div class="row-fluid" id="location_div">
+          <img src="/assets<%= @sale.region.map %>" id="location_img">
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-primary" id="positive_ratings_div">
+      <div class="panel-heading">
+        <h3 class="panel-title"><span class="glyphicon glyphicon-thumbs-up"></span> Positive ratings</h3>
+      </div>
+      <div class="panel-body">
+        <% if @positive_ratings.count > 0 %>
+          <% @positive_ratings.each do |rating| %>
+            <div class="panel panel-default">
+              <div class="panel-heading"><strong><%= rating.user.username %></strong> rated this seller, on <%= rating.created_at.strftime("%B %d (%Y)") %>, about <%= link_to 'this property', rating.sale %></div>
+              <div class="panel-body">
+                <%= rating.reason %>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <p>None positive rating.</p>
+        <% end %>
+      </div>
+    </div>
+    <div class="panel panel-danger" id="negative_ratings_div">
+      <div class="panel-heading">
+        <h3 class="panel-title"><span class="glyphicon glyphicon-thumbs-down"></span> Negative ratings</h3>
+      </div>
+      <div class="panel-body">
+        <% if @negative_ratings.count > 0 %>
+          <% @negative_ratings.each do |rating| %>
+            <div class="panel panel-default">
+              <div class="panel-heading"><strong><%= rating.user.username %></strong> rated this seller, on <%= rating.created_at.strftime("%B %d (%Y)") %>, about <%= link_to 'this property', rating.sale %></div>
+              <div class="panel-body">
+                <%= rating.reason %>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <p>None negative rating.</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="breaking_rules_div">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Report breaking rules</h4>
+      </div>
+      <div class="modal-body">
+        <p>To report scammers or make a complaint about the vendor, please use the 'Rate the vendor' option.</p>
+        <p>What are the rules of Archbroker?</p>
+        <%= render partial: 'layouts/rules' %>
+        <p>If this sale is breaking any of the above rules, please click on the 'Report' button below. Otherwise, click on the 'Cancel' button.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="report_breaking_rules(<%= @sale.id %>)">Report</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div class="modal fade" id="rating_div">
+  <%= form_for(@rating, url: ratings_path(@rating), html: { onsubmit: 'return validates()'}) do |f| %>
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title">Rate the vendor</h4>
+        </div>
+        <div class="modal-body">
+          <p>Here you can report scamming or make a complaint about the vendor. To report Archbroker rules breaking, please use the 'Report breaking rules' option. <strong>Don't use this just to make comments! Use this feature wisely!</strong></p>
+          <div class="form-group">
+            <label for="rating[rating]" class="control-label">What is your evaluation for this vendor?</label><br>
+            <div class="btn-group" data-toggle="buttons">
+              <label class="btn btn-primary">
+                <%= f.radio_button :rating, true %>
+                <span class="glyphicon glyphicon-thumbs-up"></span> Positive
+              </label>
+              <label class="btn btn-danger">
+                <%= f.radio_button :rating, false %>
+                <span class="glyphicon glyphicon-thumbs-down"></span> Negative
+              </label>
+            </div>
+            <span id="rating_required" class="error">Please select one option!</span>
+          </div>
+          <div class="form-group">
+            <label for="reason">Why is this your rating for this vendor?</label>
+            <%= f.text_area :reason, class: 'form-control', rows: 3 %>
+            <span id="reason_required" class="error">Can't be blank!</span>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <input type="submit" class="btn btn-primary" value="Send!">
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+    <input type="hidden" name="sale_id" value="<%= @sale.id %>">
+  <% end %>
+</div><!-- /.modal -->
+
+
+<div class="modal fade" id="login_required_div">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title">Rate the vendor</h4>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning">
+          <h4><span class="glyphicon glyphicon-warning-sign"></span> You need to be logged in to rate a vendor!</h4>
+          <p>Login <a href="<%= login_path %>" class="alert-link">clicking here</a>! Don't have an account? <a href="<%= new_user_path %>" class="alert-link">Click here</a>!</p>
+        </div>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

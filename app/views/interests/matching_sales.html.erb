@@ -1,0 +1,34 @@
+<% if @sales.size > 0 %>
+  <h2>Did you saw these matching sales?</h2>
+
+  <table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Property</th>
+        <th>Region</th>
+        <th>Price</th>
+        <th>Appraisal?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @sales.each do |sale| %>
+        <tr>
+          <td><%= link_to sale.short_title, sale %></td>
+          <td><%= sale.property.name %></td>
+          <td><%= sale.region.name %></td>
+          <td><%= sale.price %> golds</td>
+          <td><%= sale.appraisal? %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <%= will_paginate @sales, renderer: BootstrapPagination::Rails %>
+<% else %>
+  <h2>Sales Advisor</h2>
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <h5>Ok, we still don't have sales that matches with your criterias. We will send an e-mail to you when we found something interesting.</h5>
+    </div>
+  </div>
+<% end %>

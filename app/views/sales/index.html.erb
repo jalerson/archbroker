@@ -1,0 +1,111 @@
+<h2>Sales</h2>
+
+<div class="well">
+  <%= form_tag({controller: "sales", action: "index"}, method: "get", role: "form", class: 'form-inline') do %>
+    <div class="form-group">
+      <select id="server_id" name="server_id" class="form-control">
+        <option value="">Server (All)</option>
+        <% ServerRegion.all.each do |server_region| %>
+          <optgroup label="<%= server_region.name %>">
+            <% server_region.servers.each do |server| %>
+              <% if params[:server_id].present? and params[:server_id].to_i == server.id %>
+                <option selected value="<%= server.id %>"><%= server.name %></option>
+              <% else %>
+                <option value="<%= server.id %>"><%= server.name %></option>
+              <% end %>
+            <% end %>
+          </optgroup>
+        <% end %>
+      </select>
+    </div>
+    <div class="form-group">
+      <select id="region_id" name="region_id" class="form-control">
+        <option value="">Region (All)</option>
+        <% Continent.all.each do |continent| %>
+          <% if params[:region_id].present? and params[:region_id] == "continent_#{continent.id}" %>
+            <option class="bold" selected value="continent_<%= continent.id %>"><%= continent.name.upcase %></option>
+          <% else %>
+            <option class="bold" value="continent_<%= continent.id %>"><%= continent.name.upcase %></option>
+          <% end %>
+          <% continent.regions.each do |region| %>
+            <% if params[:region_id].present? and params[:region_id].to_i == region.id %>
+              <option selected value="<%= region.id %>"> &nbsp; &nbsp; <%= region.name %></option>
+            <% else %>
+              <option value="<%= region.id %>"> &nbsp; &nbsp; <%= region.name %></option>
+            <% end %>
+          <% end %>
+        <% end %>
+      </select>
+    </div>
+    <div class="form-group">
+      <select id="property_id" name="property_id" class="form-control">
+        <option value="">Property (All)</option>
+        <% Type.all.each do |type| %>
+          <optgroup label="<%= type.name %>">
+            <% type.properties.each do |property| %>
+              <% if params[:property_id].present? and params[:property_id].to_i == property.id %>
+                <option selected value="<%= property.id %>"><%= "#{property.name} (#{property.size.name})" %></option>
+              <% else %>
+                <option value="<%= property.id %>"><%= "#{property.name} (#{property.size.name})" %></option>
+              <% end %>
+            <% end %>
+          </optgroup>
+        <% end %>
+      </select>
+    </div>
+    <div class="form-group">
+      <select id="size_id" name="size_id" class="form-control">
+        <option value="">Size (All)</option>
+        <% Size.all.each do |size| %>
+          <% if params[:size_id].present? and params[:size_id].to_i == size.id %>
+            <option selected value="<%= size.id %>"><%= "#{size.name}" %></option>
+          <% else %>
+            <option value="<%= size.id %>"><%= "#{size.name}" %></option>
+          <% end %>
+        <% end %>
+      </select>
+    </div>
+    <div class="form-group">
+      <input type="text" class="form-control" size="10" name="price_min" id="price_min" placeholder="Price (min)" value="<%= params[:price_min] %>" onkeypress="return validates_number(event)"> 
+      <input type="text" class="form-control" size="10" name="price_max" id="price_max" placeholder="Price (max)" value="<%= params[:price_max] %>" onkeypress="return validates_number(event)">
+    </div>
+    <div class="form-group">
+      <% if params[:appraisal].present? and params[:appraisal] == 'yes' %>
+        <input type="checkbox" class="form-control" name="appraisal" id="appraisal" value="yes"> Appraisal?
+      <% else %>
+        <input type="checkbox" class="form-control" name="appraisal" id="appraisal" value="yes"> Appraisal?
+      <% end %>
+    </div>
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> Search!</button>
+    </div>
+  <% end %>
+</div>
+
+<% unless @sales.empty? %>
+  <table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Property</th>
+        <th>Region</th>
+        <th>Price</th>
+        <th>Appraisal?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @sales.each do |sale| %>
+        <tr>
+          <td><%= link_to sale.short_title, sale %></td>
+          <td><%= sale.property.name %></td>
+          <td><%= sale.region.name %></td>
+          <td><%= sale.price %> golds</td>
+          <td><%= sale.appraisal? %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <%= will_paginate @sales, renderer: BootstrapPagination::Rails %>
+<% else %>
+  <h4>No sale found. <%= link_to 'Be the first', new_sale_path %>!</h4>
+<% end %>

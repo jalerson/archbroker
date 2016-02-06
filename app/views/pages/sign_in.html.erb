@@ -1,0 +1,159 @@
+<%= content_for :head do %>
+	<script type="text/javascript">
+    <% if @user.errors.any? %>
+      $(function() {
+        <% if @user.errors[:username].present? %>
+          $("#user_username").parent().addClass("has-error");
+          $("#username_duplicated").show();
+        <% end %>
+
+        <% if @user.errors[:email].present? %>
+          $("#user_email").parent().addClass("has-error");
+          $("#email_duplicated").show();
+        <% end %>
+      });
+    <% end %>
+
+		function validates() {
+			var validation = true;
+			$(".error").hide();
+			$(".has-error").removeClass("has-error");
+
+			if($("#user_username").val() == "") {
+        validation = false;
+        $("#user_username").parent().addClass("has-error");
+        $("#username_required").show();
+      } else {
+        if(!validates_username($("#user_username").val())) {
+          validation = false;
+          $("#user_username").parent().addClass("has-error");
+          $("#username_invalid").show();
+        }
+      }
+
+      if($("#user_email").val() == "") {
+        validation = false;
+        $("#user_email").parent().addClass("has-error");
+        $("#email_required").show();
+      } else {
+      	if(!validates_email($("#user_email").val())) {
+      		validation = false;
+        	$("#user_email").parent().addClass("has-error");
+        	$("#email_invalid").show();
+      	}
+      }
+
+      if($("#user_password").val() == "") {
+        validation = false;
+        $("#user_password").parent().addClass("has-error");
+        $("#password_required").show();
+      } else {
+      	if($("#user_password").val().length < 5) {
+	        validation = false;
+	        $("#user_password").parent().addClass("has-error");
+	        $("#password_short").show();
+	      }
+      }
+
+      if($("#user_password_confirmation").val() == "") {
+        validation = false;
+        $("#user_password_confirmation").parent().addClass("has-error");
+        $("#password_confirmation_required").show();
+      }
+
+      if($("#user_password").val() != $("#user_password_confirmation").val()) {
+        validation = false;
+        $("#user_password").parent().addClass("has-error");
+        $("#user_password_confirmation").parent().addClass("has-error");
+        $("#password_doesnt_match").show();
+      }
+
+			return validation;
+		}
+	</script>
+<% end %>
+
+<div class="row-fluid">
+	<div class="col-md-2"></div>
+	<div class="col-md-4">
+		<div class="panel panel-primary">
+			<div class="panel-heading">
+		    	<h2 class="panel-title">Log in!</h2>
+			</div>
+			<div class="panel-body">
+		 		<%= form_tag({controller: "sessions", action: "login"}, method: "post", class: "form-horizontal", role: "form") do %>
+		 			<div class="form-group">
+		 				<div class="col-sm-12">
+		 					<%= email_field_tag(:email, nil, class: "form-control", placeholder: 'E-mail') %>
+		 				</div>
+		 			</div>
+		 			<div class="form-group">
+		 				<div class="col-sm-12">
+		 					<%= password_field_tag(:password, nil, class: "form-control", placeholder: 'Password') %>
+		 				</div>
+		 			</div>
+		 			<div class="form-group">
+				    	<div class="col-sm-12">
+				    		<a href="<%= request_password_path %>">Forgot your password?</a>
+				    	</div>
+				  	</div>
+		 			<div class="form-group">
+						<div class="col-sm-12">
+					    	<button type="submit" class="btn btn-primary">Log in!</button>
+					    </div>
+					</div>
+          <%= hidden_field_tag(:original_url, @original_url) %>
+		 		<% end %>
+		  </div>
+		</div>
+	</div>
+	<div class="col-md-4">
+		<div class="panel panel-success">
+			<div class="panel-heading">
+		    	<h2 class="panel-title">Don't have an account?</h2>
+		  	</div>
+			<div class="panel-body">
+		    	<%= form_for(@user, url: users_path(@user), html: { class: 'form-horizontal', onsubmit: 'return validates()'}) do |f| %>
+		 			<div class="form-group">
+		 				<div class="col-sm-12">
+		 					<%= f.text_field(:username, class: "form-control", placeholder: 'Username') %>
+		 					<span id="username_required" class="error">Can't be blank!</span>
+              <span id="username_invalid" class="error">Invalid username!</span>
+		 					<span id="username_duplicated" class="error">Username already taken!</span>
+		 				</div>
+		 			</div>
+		 			<div class="form-group">
+		 				<div class="col-sm-12">
+		 					<%= f.email_field(:email, class: "form-control", placeholder: 'E-mail address') %>
+		 					<span id="email_required" class="error">Can't be blank!</span>
+		 					<span id="email_invalid" class="error">Invalid e-mail address!</span>
+              <% if @user.errors.any? and @user.errors[:email].present? %>
+                <span id="email_duplicated" class="error">E-mail address already used!</span>
+              <% end %>
+		 				</div>
+		 			</div>
+		 			<div class="form-group">
+		 				<div class="col-sm-12">
+		 					<%= f.password_field(:password, class: "form-control", placeholder: 'Password', autocomplete: 'off') %>
+		 					<span id="password_required" class="error">Can't be blank!</span>
+		 					<span id="password_short" class="error">Password too short (min. length: 5)</span>
+		 				</div>
+		 			</div>
+		 			<div class="form-group">
+		 				<div class="col-sm-12">
+		 					<%= f.password_field(:password_confirmation, class: "form-control", placeholder: 'Password confirmation', autocomplete: 'off') %>
+		 					<span id="password_confirmation_required" class="error">Can't be blank!</span>
+		 					<span id="password_doesnt_match" class="error">Passwords doesn't match!</span>
+		 				</div>
+		 			</div>
+		 			<div class="form-group">
+						<div class="col-sm-12">
+					   <button type="submit" class="btn btn-success">Sign in!</button>
+					 </div>
+					</div>
+		 		<% end %>
+		  	</div>
+		</div>
+	</div>
+	<div class="col-md-2"><%= params[:errors] %></div>
+</div>

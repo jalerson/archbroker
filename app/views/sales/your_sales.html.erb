@@ -1,0 +1,110 @@
+<h2>Your Sales</h2>
+
+<div class="well">
+  <%= form_tag({controller: "sales", action: "your_sales"}, method: "get", role: "form", class: 'form-inline') do %>
+    <div class="form-group">
+      <select id="server_id" name="server_id" class="form-control">
+        <option value="">Server (All)</option>
+        <% ServerRegion.all.each do |server_region| %>
+          <optgroup label="<%= server_region.name %>">
+            <% server_region.servers.each do |server| %>
+              <% if params[:server_id].present? and params[:server_id].to_i == server.id %>
+                <option selected value="<%= server.id %>"><%= server.name %></option>
+              <% else %>
+                <option value="<%= server.id %>"><%= server.name %></option>
+              <% end %>
+            <% end %>
+          </optgroup>
+        <% end %>
+      </select>
+    </div>
+    <div class="form-group">
+      <select id="region_id" name="region_id" class="form-control">
+        <option value="">Region (All)</option>
+        <% Continent.all.each do |continent| %>
+          <% if params[:region_id].present? and params[:region_id] == "continent_#{continent.id}" %>
+            <option class="bold" selected value="continent_<%= continent.id %>"><%= continent.name.upcase %></option>
+          <% else %>
+            <option class="bold" value="continent_<%= continent.id %>"><%= continent.name.upcase %></option>
+          <% end %>
+          <% continent.regions.each do |region| %>
+            <% if params[:region_id].present? and params[:region_id].to_i == region.id %>
+              <option selected value="<%= region.id %>"> &nbsp; &nbsp; <%= region.name %></option>
+            <% else %>
+              <option value="<%= region.id %>"> &nbsp; &nbsp; <%= region.name %></option>
+            <% end %>
+          <% end %>
+        <% end %>
+      </select>
+    </div>
+    <div class="form-group">
+      <select id="property_id" name="property_id" class="form-control">
+        <option value="">Property (All)</option>
+        <% Type.all.each do |type| %>
+          <optgroup label="<%= type.name %>">
+            <% type.properties.each do |property| %>
+              <% if params[:property_id].present? and params[:property_id].to_i == property.id %>
+                <option selected value="<%= property.id %>"><%= "#{property.name} (#{property.size.name})" %></option>
+              <% else %>
+                <option value="<%= property.id %>"><%= "#{property.name} (#{property.size.name})" %></option>
+              <% end %>
+            <% end %>
+          </optgroup>
+        <% end %>
+      </select>
+    </div>
+    <div class="form-group">
+      <select name="status_id" class="form-control">
+        <option value="">Status (All)</option>
+        <% Status.all.each do |status| %>
+          <% if params[:status_id].present? and status.id == params[:status_id].to_i %>
+            <option selected value="<%= status.id %>"><%= status.name %></option>
+          <% else %>
+            <option value="<%= status.id %>"><%= status.name %></option>
+          <% end %>
+        <% end %>
+      </select>
+    </div>
+    <div class="form-group">
+      <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> Search!</button>
+    </div>
+  <% end %>
+</div>
+
+<% unless @sales.empty? %>
+  <table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Property</th>
+        <th>Region</th>
+        <th>Price</th>
+        <th>Appraisal?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @sales.each do |sale| %>
+        <% if sale.selling? %>
+          <tr>
+        <% end %>
+        <% if sale.sold? %>
+          <tr class="success">
+        <% end %>
+        <% if sale.removed_for_breaking_rules? %>
+          <tr class="danger">
+        <% end %>
+        <% if sale.deleted_by_the_owner? %>
+          <tr class="warning">
+        <% end %>
+          <td><%= link_to sale.short_title, sale %></td>
+          <td><%= sale.property.name %></td>
+          <td><%= sale.region.name %></td>
+          <td><%= sale.price %> golds</td>
+          <td><%= sale.appraisal? %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <h4>No sale found!</h4>
+<% end %>

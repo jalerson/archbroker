@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Archbroker</title>
+  <%= javascript_include_tag 'jquery-1.11.1.min' %>
+  <%= javascript_include_tag 'bootstrap.min' %>
+  <%= javascript_include_tag 'application' %>
+  <%= stylesheet_link_tag 'application' %>
+  <%= stylesheet_link_tag 'bootstrap/bootstrap.min' %>
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+  <%= csrf_meta_tags %>
+  <% if Rails.env.production? %>
+    <script type="text/javascript">
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-56316080-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+  <% end %>
+  <%= yield :head %>
+</head>
+<body>
+
+<nav class="navbar navbar-default" role="navigation">
+  <div class="container-fixed">
+    <div class="navbar-header">
+          <a class="navbar-brand" href="<%= root_path %>"><strong>Arch</strong>broker</a>
+      </div>
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li><a href="<%= root_path %>"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+          <li><a href="<%= sales_path %>"><span class="glyphicon glyphicon-shopping-cart"></span> Sales</a></li>
+          <li><a href="<%= new_sale_path %>"><span class="glyphicon glyphicon-usd"></span> New Sale</a></li>
+          <li><a href="<%= new_feedback_path %>"><span class="glyphicon glyphicon-envelope"></span> Feedback</a></li>
+          <li><a href="http://www.facebook.com/archbroker" target="_blank"><i class="fa fa-facebook"></i> Facebook</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <% if current_user.present? %>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> <%= current_user.username %> <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="<%= account_path %>"><span class="glyphicon glyphicon-edit"></span> Your account</a></li>
+                <li><a href="<%= your_sales_path %>"><span class="glyphicon glyphicon-shopping-cart"></span> Your sales</a></li>
+                <li><a href="<%= interests_path %>"><span class="glyphicon glyphicon-bullhorn"></span> Your interests</a></li>
+                <li class="divider"></li>
+                <li><a href="<%= logout_path %>"><span class="glyphicon glyphicon-off"></span> Logout</a></li>
+              </ul>
+            </li>
+          <% else %>
+            <li><a href="<%= new_user_path %>"><span class="glyphicon glyphicon-user"></span> Sign up</a></li>
+            <li><a href="<%= login_path %>"><span class="glyphicon glyphicon-lock"></span> Login</a></li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+</nav>
+
+<div class="container">
+  <% if notice.present? %>
+    <div class="alert alert-info" role="alert"><span class="glyphicon glyphicon-ok-sign"></span> <%= notice %></div>
+  <% end %>
+  <% if alert.present? %>
+    <div class="alert alert-danger" role="alert"><span class="glyphicon glyphicon-remove-sign"></span> <%= alert %></div>
+  <% end %>
+	<%= yield %>
+</div>
+
+</body>
+</html>

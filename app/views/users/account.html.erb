@@ -1,0 +1,112 @@
+<%= content_for :head do %>
+  <script type="text/javascript">
+    <% if @user.errors.any? %>
+      $(function() {
+        <% if @user.errors[:username].present? %>
+          $("#user_username").parent().addClass("has-error");
+          $("#username_duplicated").show();
+        <% end %>
+
+        <% if @user.errors[:email].present? %>
+          $("#user_email").parent().addClass("has-error");
+          $("#email_duplicated").show();
+        <% end %>
+      });
+    <% end %>
+
+    function validates() {
+      var validation = true;
+      $(".error").hide();
+      $(".has-error").removeClass("has-error");
+
+      if($("#user_username").val() == "") {
+        validation = false;
+        $("#user_username").parent().addClass("has-error");
+        $("#username_required").show();
+      } else {
+        if(!validates_username($("#user_username").val())) {
+          validation = false;
+          $("#user_username").parent().addClass("has-error");
+          $("#username_invalid").show();
+        }
+      }
+
+      if($("#user_email").val() == "") {
+        validation = false;
+        $("#user_email").parent().addClass("has-error");
+        $("#email_required").show();
+      } else {
+        if(!validates_email($("#user_email").val())) {
+          validation = false;
+          $("#user_email").parent().addClass("has-error");
+          $("#email_invalid").show();
+        }
+      }
+
+      if($("#user_password").val() != "") {
+        if($("#user_password").val().length < 5) {
+          validation = false;
+          $("#user_password").parent().addClass("has-error");
+          $("#password_short").show();
+        }
+      }
+
+      if($("#user_password").val() != $("#user_password_confirmation").val()) {
+        validation = false;
+        $("#user_password").parent().addClass("has-error");
+        $("#user_password_confirmation").parent().addClass("has-error");
+        $("#password_doesnt_match").show();
+      }
+
+      return validation;
+    }
+  </script>
+<% end %>
+
+<h2>Your Account</h2>
+
+<div class="panel panel-default">
+  <div class="panel-body">
+    <%= form_for(@user, url: user_path(@user), html: { class: 'form-horizontal', onsubmit: 'return validates()'}) do |f| %>
+      <div class="form-group">
+        <div class="col-sm-12">
+          <label for="user_username">Username</label>
+          <%= f.text_field(:username, class: "form-control", placeholder: 'Username') %>
+          <span id="username_required" class="error">Can't be blank!</span>
+          <span id="username_invalid" class="error">Invalid username!</span>
+          <span id="username_duplicated" class="error">Username already taken!</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-12">
+          <label for="user_email">E-mail address</label>
+          <%= f.email_field(:email, class: "form-control", placeholder: 'E-mail address') %>
+          <span id="email_required" class="error">Can't be blank!</span>
+          <span id="email_invalid" class="error">Invalid e-mail address!</span>
+          <% if @user.errors.any? and @user.errors[:email].present? %>
+            <span id="email_duplicated" class="error">E-mail address already used!</span>
+          <% end %>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-12">
+          <label for="user_password">New password</label>
+          <%= f.password_field(:password, class: "form-control", placeholder: 'Password', autocomplete: 'off') %>
+          <span id="password_short" class="error">Password too short (min. length: 5)</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-12">
+          <label for="user_password_confirmation">New password confirmation</label>
+          <%= f.password_field(:password_confirmation, class: "form-control", placeholder: 'Password confirmation', autocomplete: 'off') %>
+          <span id="password_doesnt_match" class="error">Passwords doesn't match!</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-sm-12">
+            <button type="submit" class="btn btn-success">Done!</button>
+          </div>
+      </div>
+    <% end %>
+  </div>
+</div>

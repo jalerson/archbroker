@@ -1,0 +1,101 @@
+
+<div class="jumbotron">
+  <h2>Welcome to <strong>Arch</strong>broker!</h2>
+  <p>Archbroker is the easiest way to find or sell your properties (farms, houses, etc.) in Archeage. Here you can search for sales offers in your server or make your own sale offer to other players! All free! =)</p>
+</div>
+
+<div class="col-md-4">
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h2 class="panel-title">Wanna buy?</h2>
+    </div>
+    <div class="panel-body">
+      <%= form_tag({controller: "sales", action: "index"}, method: "get", role: "form") do %>
+        <div class="form-group">
+          <select id="server_id" name="server_id" class="form-control">
+            <option value="">Server (All)</option>
+            <% ServerRegion.all.each do |server_region| %>
+              <optgroup label="<%= server_region.name %>">
+                <% server_region.servers.each do |server| %>
+                  <% if params[:server_id].present? and params[:server_id].to_i == server.id %>
+                    <option selected value="<%= server.id %>"><%= server.name %></option>
+                  <% else %>
+                    <option value="<%= server.id %>"><%= server.name %></option>
+                  <% end %>
+                <% end %>
+              </optgroup>
+            <% end %>
+          </select>
+        </div>
+        <div class="form-group">
+          <select id="region_id" name="region_id" class="form-control">
+            <option value="">Region (All)</option>
+            <% Continent.all.each do |continent| %>
+              <option class="bold" value="continent_<%= continent.id %>"><%= continent.name.upcase %></option>
+              <% continent.regions.each do |region| %>
+                <option value="<%= region.id %>"> &nbsp; &nbsp; <%= region.name %></option>
+              <% end %>
+            <% end %>
+          </select>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> Search!</button>
+        </div>
+      <% end %>  
+    </div>
+  </div>
+</div>
+
+<div class="col-md-4">
+  <div class="panel panel-success">
+    <div class="panel-heading">
+      <h2 class="panel-title">Wanna sell?</h2>
+    </div>
+    <div class="panel-body">
+      <% if current_user.present? %>
+        <p>Great! You can make as many sale offers as you want for free!</p>
+        <a href="<%= new_sale_path %>" class="btn btn-success"><span class="glyphicon glyphicon-usd"></span> Go to sale registration form!</a>
+      <% else %>
+        <%= form_tag({controller: "sessions", action: "authenticate"}, method: "post", class: "form-horizontal", role: "form") do %>
+          <div class="form-group">
+            <div class="col-sm-12">
+              <%= email_field_tag(:email, nil, class: "form-control", placeholder: 'E-mail') %>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-12">
+              <%= password_field_tag(:password, nil, class: "form-control", placeholder: 'Password') %>
+            </div>
+          </div>
+          <div class="form-group">
+              <div class="col-sm-12">
+                <a href="<%= request_password_path %>">Forgot your password?</a>
+              </div>
+            </div>
+          <div class="form-group">
+            <div class="col-sm-12">
+                <button type="submit" class="btn btn-success">Log in!</button>
+                <%= link_to "Don't have account?", new_user_path, class: 'btn btn-danger' %>
+              </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="col-md-4">
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h2 class="panel-title">Sales Advisor</h2>
+    </div>
+    <div class="panel-body">
+      <p>Get notified when a sale that matches your interests is registered!</p>
+      <% if current_user.present? %>
+        <a href="<%= new_interest_path %>" class="btn btn-info"><span class="glyphicon glyphicon-bullhorn"></span> Go to interests registration form!</a>
+      <% else %>
+        <%= link_to 'You need to be logged in!', new_interest_path, class: 'btn btn-info disabled' %>
+      <% end %>
+    </div>
+  </div>
+</div>

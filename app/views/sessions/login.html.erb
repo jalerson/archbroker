@@ -1,0 +1,59 @@
+<%= content_for :head do %>
+  <script type="text/javascript">
+
+    function validates() {
+      var validation = true;
+      $(".error").hide();
+      $(".has-error").removeClass("has-error");
+
+      if($("#email").val() == "") {
+        validation = false;
+        $("#email").parent().addClass("has-error");
+        $("#email_required").show();
+      }
+
+      if($("#password").val() == "") {
+        validation = false;
+        $("#password").parent().addClass("has-error");
+        $("#password_required").show();
+      }
+
+      return validation;
+    }
+  </script>
+<% end %>
+
+<div class="row-fluid">
+  <div class="col-md-12">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h2 class="panel-title">Log in!</h2>
+      </div>
+      <div class="panel-body">
+        <%= form_tag({controller: "sessions", action: "authenticate"}, method: "post", class: "form-horizontal", role: "form") do %>
+          <div class="form-group">
+            <div class="col-sm-12">
+              <%= email_field_tag(:email, nil, class: "form-control", placeholder: 'E-mail') %>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="col-sm-12">
+              <%= password_field_tag(:password, nil, class: "form-control", placeholder: 'Password') %>
+            </div>
+          </div>
+          <div class="form-group">
+              <div class="col-sm-12">
+                <a href="<%= request_password_path %>">Forgot your password?</a>
+              </div>
+            </div>
+          <div class="form-group">
+            <div class="col-sm-12">
+                <button type="submit" class="btn btn-primary">Log in!</button>
+              </div>
+          </div>
+          <%= hidden_field_tag(:original_url, @original_url) %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

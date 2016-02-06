@@ -1,0 +1,154 @@
+<%= content_for :head do %>
+  <script type="text/javascript">
+
+      function validates() {
+        var validation = true;
+        $(".has-error").removeClass("has-error");
+
+        if($("#interest_server_id").val() == "") {
+          validation = false;
+          $("#interest_server_id").parent().addClass("has-error");
+        }
+
+        if($("#interest_title").val() == "") {
+          validation = false;
+          $("#interest_title").parent().addClass("has-error");
+        }
+
+        return validation;
+      }
+  </script>
+<% end %>
+
+<h2>Sales Advisor</h2>
+
+<%= form_for(@interest, url: interests_path(@interest), html: { onsubmit: 'return validates()', class: 'form-horizontal' }) do |f| %>
+  <div class="row-fluid">
+    <div class="col-md-12">
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          <h2 class="panel-title">Interest Registration</h2>
+        </div>
+        <div class="panel-body">
+          <p>Fields with * are mandatory.</p>
+          <div class="row-fluid">
+            <div class="col-md-5">
+              <div class="form-group">
+                <label for="interest_title" class="col-sm-4 control-label">Title *</label>
+                <div class="col-sm-8">
+                  <input type="text" class="form-control" id="interest_title" placeholder="Title" name="interest[title]">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="interest_server_id" class="col-sm-4 control-label">Server *</label>
+                <div class="col-sm-8">
+                  <select id="interest_server_id" name="interest[server_id]" class="form-control">
+                    <option value="">Select your server</option>
+                    <% ServerRegion.all.each do |server_region| %>
+                      <optgroup label="<%= server_region.name %>">
+                        <% server_region.servers.each do |server| %>
+                          <option value="<%= server.id %>"><%= server.name %></option>
+                        <% end %>
+                      </optgroup>
+                    <% end %>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="interest_region_code" class="col-sm-4 control-label">Region</label>
+                <div class="col-sm-8">
+                  <select id="interest_region_code" name="interest[region_code]" class="form-control">
+                    <option value="">All regions</option>
+                    <% Continent.all.each do |continent| %>
+                      <option class="bold" value="continent_<%= continent.id %>"><%= continent.name.upcase %></option>
+                      <% continent.regions.each do |region| %>
+                          <option value="region_<%= region.id %>"> &nbsp; &nbsp; <%= region.name %></option>
+                      <% end %>
+                    <% end %>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="interest_min_price" class="col-sm-4 control-label">Minimal price</label>
+                <div class="col-sm-8">
+                  <input type="number" class="form-control" id="interest_min_price" placeholder="Minimal price" name="interest[min_price]">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="interest_max_price" class="col-sm-4 control-label">Maximum price</label>
+                <div class="col-sm-8">
+                  <input type="number" class="form-control" id="interest_max_price" placeholder="Maximum price" name="interest[max_price]">
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="col-lg-10 col-lg-offset-2">
+                  <button type="submit" class="btn btn-info"><span class="glyphicon glyphicon-send"></span> Send!</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-5">
+              <div class="form-group">
+                <label for="interest_category_id" class="col-sm-4 control-label">Category</label>
+                <div class="col-sm-8">
+                  <select id="interest_category_id" name="interest[category_id]" class="form-control">
+                    <option value="">All categories</option>
+                    <% Category.all.each do |category| %>
+                      <option value="<%= category.id %>"><%= category.name %></option>
+                    <% end %>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="interest_type_id" class="col-sm-4 control-label">Type</label>
+                <div class="col-sm-8">
+                  <select id="interest_type_id" name="interest[type_id]" class="form-control">
+                    <option value="">All types</option>
+                    <% Type.all.each do |type| %>
+                      <option value="<%= type.id %>"><%= type.name %></option>
+                    <% end %>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="interest_size_id" class="col-sm-4 control-label">Size</label>
+                <div class="col-sm-8">
+                  <select id="interest_size_id" name="interest[size_id]" class="form-control">
+                    <option value="">All sizes</option>
+                    <% Size.all.each do |size| %>
+                      <option value="<%= size.id %>"><%= "#{size.name}" %></option>
+                    <% end %>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="interest_property_id" class="col-sm-4 control-label">Property</label>
+                <div class="col-sm-8">
+                  <select id="interest_property_id" name="interest[property_id]" class="form-control">
+                    <option value="">Property</option>
+                    <% Type.all.each do |type| %>
+                      <optgroup label="<%= type.name %>">
+                        <% type.properties.each do |property| %>
+                          <option value="<%= property.id %>"><%= "#{property.name} (#{property.size.name})" %></option>
+                        <% end %>
+                      </optgroup>
+                    <% end %>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="" class="col-sm-4 control-label"></label>
+                <div class="col-sm-8">
+                  <div class="checkbox">
+                    <label>
+                      <input type="checkbox" name="interest[appraisal]" id="interest_appraisal" value="1"> Only with appraisal
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

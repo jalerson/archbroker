@@ -1,0 +1,214 @@
+<%= content_for :head do %>
+  <%= javascript_include_tag 'jquery-ui' %>
+  <%= javascript_include_tag 'application' %>
+  <%= javascript_include_tag 'jquery.fs.zoetrope.min' %>
+  <%= javascript_include_tag 'toe.min' %>
+  <%= javascript_include_tag 'jquery.mousewheel.min' %>
+  <%= javascript_include_tag 'imgViewer.min' %>
+  <%= javascript_include_tag 'imgNotes' %>
+  <%= stylesheet_link_tag 'marker' %>
+  
+  <script type="text/javascript">
+    $(document).ready(function() {
+      $(".error").hide();
+      $("#location_img").imgNotes({ canEdit: true });
+      $("#location_img").imgNotes("import", [{ x: "<%= @sale.x %>", y: "<%= @sale.y %>" }]);
+
+      $("#location_img").imgNotes("option", "onAdd", function() {
+        $("#location_img").imgNotes("clear");
+        return $(document.createElement('span')).addClass("marker");
+      });
+    });
+
+    var maps = new Array();
+    <% Region.all.each do |region| %>
+      maps[<%= region.id %>] = "<%= region.map %>";
+    <% end %>
+
+    function display_map() {
+      map_name = maps[$("#sale_region_id").val()];
+      $("#location_img").remove();
+      $("#location_div").html("<img src='/assets/"+map_name+"' id='location_img'>");
+      $("#location_img").imgNotes({canEdit: true});
+      $("#location_img").imgNotes("option", "hAll", "middle");
+      $("#location_img").imgNotes("option", "vAll", "bottom");
+    }
+
+    function validates() {
+      var validation = true;
+      $(".has-error").removeClass("has-error");
+      $(".error").hide();
+
+      if($("#sale_title").val() == "") {
+        validation = false;
+        $("#sale_title").parent().addClass("has-error");
+        $("#title_required").show();
+      }
+
+      if($("#sale_price").val() == "") {
+        validation = false;
+        $("#sale_price").parent().addClass("has-error");
+        $("#price_required").show();
+      } else {
+        if(!validates_integer($("#sale_price").val())) {
+          validation = false;
+          $("#sale_price").parent().addClass("has-error");
+          $("#price_invalid").show();
+        }
+      }
+
+      if($("#sale_contact_ingame").val() == "") {
+        validation = false;
+        $("#sale_contact_ingame").parent().addClass("has-error");
+        $("#contact_ingame_required").show();
+      }
+
+      if($("#sale_contact_ingame").val() == "") {
+        validation = false;
+        $("#sale_contact_ingame").parent().addClass("has-error");
+        $("#contact_ingame_required").show();
+      }
+
+      if($("#sale_server_id").val() == "") {
+        validation = false;
+        $("#sale_server_id").parent().addClass("has-error");
+      }
+
+      if($("#sale_region_id").val() == "") {
+        validation = false;
+        $("#sale_region_id").parent().addClass("has-error");
+      }
+
+      if($("#sale_property_id").val() == "") {
+        validation = false;
+        $("#sale_property_id").parent().addClass("has-error");
+        $("#property_required").show();
+      }
+
+      var markers = $("#location_img").imgNotes('export');
+      if(markers.length < 1) {
+        validation = false;
+        $("#location_required").show();
+        $("#error_div").show();
+      } else {
+        $("#sale_x").val(markers[0].x);
+        $("#sale_y").val(markers[0].y);
+      }
+
+      return validation;
+    }
+
+  </script>
+<% end %>
+
+<h2>Sale Registration</h2>
+
+<%= form_for(@sale, url: sale_path(@sale), html: { onsubmit: 'return validates()' }) do |f| %>
+  <div class="row-fluid">
+    <div class="col-md-4">
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          <h3 class="panel-title">Property and sale informations</h3>
+        </div>
+        <div class="panel-body">
+          <div class="form-group">
+            <%= f.text_field(:title, class: 'form-control', placeholder: 'Title') %>
+            <span id="title_required" class="error">Can't be blank!</span>
+          </div>
+          <div class="form-group">
+            <%= f.text_field(:price, class: 'form-control', placeholder: 'Price (golds)', onkeypress: 'return validates_number(event)') %>
+            <span id="price_required" class="error">Can't be blank!</span>
+            <span id="price_invalid" class="error">Only integers!</span>
+          </div>
+          <div class="form-group">
+            <%= f.text_field(:contact_ingame, class: 'form-control', placeholder: "Owner name (character nickname)") %>
+            <span id="contact_ingame_required" class="error">Can't be blank!</span>
+          </div>
+          <div class="form-group">
+            <select id="sale_property_id" name="sale[property_id]" class="form-control">
+              <option value="">Property</option>
+              <% Type.all.each do |type| %>
+                <optgroup label="<%= type.name %>">
+                  <% type.properties.each do |property| %>
+                    <% if property.id == @sale.property.id %>
+                      <option selected value="<%= property.id %>"><%= "#{property.name} (#{property.size.name})" %></option>
+                    <% else %>
+                      <option value="<%= property.id %>"><%= "#{property.name} (#{property.size.name})" %></option>
+                    <% end %>
+                  <% end %>
+                </optgroup>
+              <% end %>
+            </select>
+            <span id="property_required" class="error">Select the property!</span>
+          </div>
+          <div class="form-group">
+            <%= f.check_box(:appraisal) %> Sale through appraisal certificate?
+          </div>
+          <div class="form-group">
+            <%= f.text_area(:items, class: 'form-control', placeholder: "The property has decorative items? If so, describe them (optional)") %>
+          </div>
+          <div class="form-group">
+            <%= f.text_area(:obs, class: 'form-control', placeholder: "General observations (optional)") %>
+          </div>
+          <%= f.hidden_field(:x) %>
+          <%= f.hidden_field(:y) %>
+          <%= f.submit('Done!', class: 'btn btn-success', id: 'commit') %>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="panel panel-success">
+        <div class="panel-heading">
+          <h3 class="panel-title">Property location</h3>
+        </div>
+        <div class="panel-body">
+          <div class="row-fluid">
+            <div class="col-md-5">
+              <div class="form-group">
+                <select id="sale_server_id" name="sale[server_id]" class="form-control">
+                  <option value="">Server</option>
+                  <% ServerRegion.all.each do |server_region| %>
+                    <optgroup label="<%= server_region.name %>">
+                      <% server_region.servers.each do |server| %>
+                        <% if server.id == @sale.server.id %>
+                          <option selected value="<%= server.id %>"><%= server.name %></option>
+                        <% else %>
+                          <option value="<%= server.id %>"><%= server.name %></option>
+                        <% end %>
+                      <% end %>
+                    </optgroup>
+                  <% end %>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-1"></div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <select id="sale_region_id" name="sale[region_id]" class="form-control" onchange="display_map()">
+                  <option value="">Region</option>
+                  <% Continent.all.each do |continent| %>
+                    <optgroup label="<%= continent.name %>">
+                      <% continent.regions.each do |region| %>
+                        <% if region.id == @sale.region.id %>
+                          <option selected value="<%= region.id %>"><%= region.name %></option>
+                        <% else %>
+                          <option value="<%= region.id %>"><%= region.name %></option>
+                        <% end %>
+                      <% end %>
+                    </optgroup>
+                  <% end %>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row-fluid" id="location_div">
+            <img src="/assets<%= @sale.region.map %>" id="location_img">
+          </div>
+          <div class="row-fluid error_div">
+            <span id="location_required" class="error">Please, click on the map to mark the property's location!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

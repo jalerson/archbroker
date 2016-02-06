@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1>Dear <%= @user.username %>,</h1>
+    <p>Someone just registered a sale that matches with your criterias!</p>
+    <p>Take a look: <%= sale_path(@sale) %></p>
+    <p>If you don't want to receive more e-mails like this, please log in with your credentials and click at the link <a href="<%= interests_path %>">Your Interests</a> (top right corner), and delete your interest registration.</p>
+    <p>Best regards,</p>
+    <p><strong>Sales Advisor</strong><br><a href="http://www.archbroker.com">http://www.archbroker.com</a></p>
+  </body>
+</html>

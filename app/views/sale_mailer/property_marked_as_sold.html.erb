@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <h1>Dear <%= @user.username %>,</h1>
+    <p>We received three notifications that your property was sold, so we decided to mark your property as sold.</p>
+    <p>If your property still wasn't sold, please click on the link below.</p>
+    <p><a href="http://www.archbroker.com<%= unsold_sale_path(@sale) %>">http://www.archbroker.com<%= unsold_sale_path(@sale) %></a></p>
+    <p>Best regards,</p>
+    <p><strong>Jalerson Lima</strong><br>Archbroker Administrator<br><a href="http://www.archbroker.com">http://www.archbroker.com</a></p>
+  </body>
+</html>

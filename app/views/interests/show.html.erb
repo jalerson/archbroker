@@ -1,0 +1,76 @@
+<%= content_for :head do %>
+  <script type="text/javascript">
+
+      function delete_interest(id) {
+        if(confirm("Are you sure that you want to delete this interest?")) {
+          location.href = "/interests/" + id + "/delete"
+        }
+      }
+
+  </script>
+<% end %>
+
+<h2>Sales Advisor</h2>
+
+<div class="well">
+  <div class="btn-group" role="group" aria-label="...">
+    <a href="<%= interests_path %>" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back</a>
+    <a href="<%= matching_sales_interest_path(id: @interest.id) %>" class="btn btn-info"><span class="glyphicon glyphicon-list-alt"></span> Matching sales</a>
+    <a href="#" class="btn btn-danger" onclick="delete_interest(<%= @interest.id %>)"><span class="glyphicon glyphicon-remove"></span> Delete</a>
+  </div>
+</div>
+
+<div class="panel panel-info">
+  <div class="panel-heading">
+      <h2 class="panel-title"><%= @interest.title %></h2>
+  </div>
+  <div class="panel-body">
+    <div class="row-fluid">
+      <div class="col-md-6">
+        <p><strong>Server:</strong> <%= @interest.server.name %></p>
+        <% if @interest.region.present? %>
+          <p><strong>Region:</strong> <%= @interest.region.name %></p>
+        <% else %>
+          <p><strong>Region:</strong> All regions</p>
+        <% end %>
+        <% unless @interest.min_price.blank? %>
+          <p><strong>Minimal price:</strong> <%= @interest.min_price %> gold(s)</p>
+        <% else %>
+          <p><strong>Minimal price:</strong> No minimal price</p>
+        <% end %>
+        <% unless @interest.max_price.blank? %>
+          <p><strong>Maximum price:</strong> <%= @interest.max_price %> gold(s)</p>
+        <% else %>
+          <p><strong>Maximum price:</strong> No Maximum price</p>
+        <% end %>
+        <% if @interest.appraisal %>
+          <p><strong>Only with appraisal?</strong> Yes</p>
+        <% else %>
+          <p><strong>Only with appraisal?</strong> No</p>
+        <% end %>
+      </div>
+      <div class="col-md-6">
+        <% if @interest.category.present? %>
+          <p><strong>Category:</strong> <%= @interest.category.name %></p>
+        <% else %>
+          <p><strong>Category:</strong> All categories</p>
+        <% end %>
+        <% if @interest.type.present? %>
+          <p><strong>Type:</strong> <%= @interest.type.name %></p>
+        <% else %>
+          <p><strong>Type:</strong> All types</p>
+        <% end %>
+        <% if @interest.size.present? %>
+          <p><strong>Size:</strong> <%= @interest.size.name %></p>
+        <% else %>
+          <p><strong>Size:</strong> All sizes</p>
+        <% end %>
+        <% if @interest.property.present? %>
+          <p><strong>Property:</strong> <%= @interest.property.name %></p>
+        <% else %>
+          <p><strong>Property:</strong> All properties</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

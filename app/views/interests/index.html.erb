@@ -1,0 +1,54 @@
+<%= content_for :head do %>
+  <script type="text/javascript">
+
+      function delete_interest(id) {
+        if(confirm("Are you sure that you want to delete this interest?")) {
+          location.href = "/interests/" + id + "/delete"
+        }
+      }
+
+  </script>
+<% end %>
+
+<h2>Your Interests</h2>
+
+<div class="well">
+  <div class="btn-group" role="group" aria-label="...">
+    <a href="<%= new_interest_path %>" class="btn btn-info"><span class="glyphicon glyphicon-plus"></span> New</a>
+  </div>
+</div>
+
+<% if @interests.size > 0 %>
+  <table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Server</th>
+        <th>Region/Continent</th>
+        <th>Size</th>
+        <td>Options</td>
+      </tr>
+    </thead>
+    <tbody>
+      <% @interests.each do |interest| %>
+        <tr>
+          <td><%= link_to interest.title, interest %></td>
+          <td><%= interest.server.name %></td>
+          <% if interest.region.present? %>
+            <td><%= interest.region.name %></td>
+          <% else %>
+            <td>All regions</td>
+          <% end %>
+          <% if interest.size.present? %>
+            <td><%= interest.size.name if interest.size.present? %></td>
+          <% else %>
+            <td>All sizes</td>
+          <% end %>
+          <td><a href="#" class="btn btn-danger btn-sm" onclick="delete_interest(<%= interest.id %>)"><span class="glyphicon glyphicon-remove"></span> Delete</a></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>None interest registered.</p>
+<% end %>
